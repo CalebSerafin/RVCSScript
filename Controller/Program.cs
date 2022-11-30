@@ -26,12 +26,17 @@ string code = $$""""
     """";
 var script = CSharpScript.Create(code, ScriptOptions.Default.AddReferences(Net70.References.All.Select(x => x.FilePath)), globalsType: typeof(ScriptParams), assemblyLoader: null);
 
-ScriptParams model = new(RawRepoContentPath: "/RVCSScript/master/README.md");
-var scriptResult = await script.RunAsync(model);
+ScriptParams modelReadMe = new(RawRepoContentPath: "/RVCSScript/master/README.md");
+ScriptParams modelCode = new(RawRepoContentPath: "/RVCSScript/master/Controller/Program.cs");
+
 Console.WriteLine(
-    $"\n\n========WEBPAGE========\n{
-    scriptResult.ReturnValue
-    }\n========WEBPAGE========\n");
+    $"\n========Begin Description========\n{
+    (await script.RunAsync(modelReadMe)).ReturnValue  // Real "Self-Documenting" Code
+     }\n=========End Description=========\n");
+Console.WriteLine(
+    $"\n========Begin Source Code========\n{
+    (await script.RunAsync(modelCode)).ReturnValue
+     }\n=========End Source Code=========\n");
 
 public record class ScriptParams(string RawRepoContentPath);
 
