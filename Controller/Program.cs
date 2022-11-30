@@ -8,24 +8,31 @@ string code = $$""""
     using System;
     using System.Threading.Tasks;
     using System.Net.Http;
+    string trustedBase = "https://raw.githubusercontent.com/CalebSerafin/";
     public async Task<string> GetFrostsRawContent(string path) {
-        Uri uri = new UriBuilder("https://raw.githubusercontent.com/") { Path = path }.Uri;
+        if (!Uri.TryCreate(trustedBase.TrimEnd('/') + '/' + path.TrimStart('/'), UriKind.Absolute, out Uri? uri))
+            Console.WriteLine($"Failed to combine base {trustedBase} with relative {path}");
         using HttpClient client = new();
+        Console.WriteLine($"Downloading content from {uri}");
         using HttpResponseMessage response = await client.GetAsync(uri);
+        Console.WriteLine($"Finished downloading content from {uri}");
         using HttpContent content = response.Content;
         string pageContent = await content.ReadAsStringAsync();
         return pageContent;
     }
     // The script executes like top-functions, so you need to call the method here.
-    // FrostPath is a magic variable passed in by CSharpScript.Create(..., globalsType: typeof(ScriptParams))
-    return await GetFrostsRawContent(FrostPath);
+    // RawRepoContentPath is a magic variable passed in by CSharpScript.Create(..., globalsType: typeof(ScriptParams))
+    return await GetFrostsRawContent(RawRepoContentPath);
     """";
-var script = CSharpScript.Create(code, ScriptOptions.Default.AddReferences(Net60.References.All.Select(x => x.FilePath)), globalsType: typeof(ScriptParams), assemblyLoader: null);
+var script = CSharpScript.Create(code, ScriptOptions.Default.AddReferences(Net70.References.All.Select(x => x.FilePath)), globalsType: typeof(ScriptParams), assemblyLoader: null);
 
-ScriptParams model = new(FrostPath: "official-antistasi-community/A3-Antistasi/master/Tools/StreetArtist/Please%20Read%20Me.md");
+ScriptParams model = new(RawRepoContentPath: "/RVCSScript/master/README.md");
 var scriptResult = await script.RunAsync(model);
-Console.WriteLine(scriptResult.ReturnValue);
+Console.WriteLine(
+    $"\n\n========WEBPAGE========\n{
+    scriptResult.ReturnValue
+    }\n========WEBPAGE========\n");
 
-public record class ScriptParams(string FrostPath);
+public record class ScriptParams(string RawRepoContentPath);
 
 
