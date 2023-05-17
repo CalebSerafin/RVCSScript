@@ -361,3 +361,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# CallArmaExtension ArmaExtensions folder
+CallArmaExtension/ArmaExtensions/
