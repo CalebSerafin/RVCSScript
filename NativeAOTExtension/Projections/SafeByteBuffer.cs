@@ -7,11 +7,11 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NativeAOTExtension;
+namespace NativeAOTExtension.Native;
 /// <summary>
-/// Wrapps raw pointer so it can be used as an array or string.<br/>
+/// Wraps raw pointer so it can be used as an array or string.<br/>
 /// NOT THREAD-SAFE, use external locking.<br/>
-/// Calling dispose is not nessary for memory-leak management, but it ensures that the underlying resource will not be accessed.
+/// Calling dispose is not necessary for memory-leak management, but it ensures that the underlying resource will not be accessed.
 /// </summary>
 internal unsafe class SafeByteBuffer : IDisposable {
     public SafeByteBuffer(byte* bufferPtr, int bufferSize) {
@@ -20,7 +20,9 @@ internal unsafe class SafeByteBuffer : IDisposable {
     }
 
     #region Properties
-
+    /// <summary> Gets or sets byte at specified position. For large operations, get a span. </summary>
+    /// <param name="index"></param>
+    /// <returns></returns>
     public byte this[int index] {
         get {
             AssertDispose();
@@ -33,12 +35,38 @@ internal unsafe class SafeByteBuffer : IDisposable {
             bufferPtr[index] = value;
         }
     }
+    /// <summary> You may use this to check if you can read or write to the raw buffer. </summary>
+    public bool IsDisposed => disposedValue;
     #endregion
 
     #region Public Methods
+    /// <summary>
+    /// Returns a span wrapper over the raw UTF8 encoded bytes.
+    /// </summary>
+    /// <returns></returns>
     public Span<byte> AsSpan() {
         AssertDispose();
         return AsSpan_Internal();
+    }
+
+    /// <summary>
+    /// Returns a new managed string of the UTF8 encoded bytes.
+    /// </summary>
+    /// <returns></returns>
+    public override string ToString() {
+        AssertDispose();
+        return Encoding.UTF8.GetString(AsSpan_Internal());
+    }
+
+    /// <summary>
+    /// Clears any existing data and overwrites it with the given text.
+    /// </summary>
+    /// <param name="text"></param>
+    public void OverwriteText(string text) {
+        AssertDispose();
+        Span<byte> span = AsSpan_Internal();
+        span.Clear();
+        Encoding.UTF8.GetBytes(text).CopyTo(span);
     }
     #endregion
 

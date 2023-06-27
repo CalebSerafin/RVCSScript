@@ -41,7 +41,7 @@ void ErrorExit(LPTSTR lpszFunction) {
 }
 
 class ArmaExtensionApi {
-    DllHelper _dll{ L".\\ArmaExtensions\\NativeAOTExtension.dll" };
+    DllHelper _dll{ L".\\ArmaExtensions\\NativeAOTExtension_x64.dll" };
 
 public:
     typedef int(WINAPI* RVExtensionRegisterCallbackProc)(void (*)(char* name, char* function, char* data));
